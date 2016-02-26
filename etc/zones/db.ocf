@@ -10,7 +10,7 @@
 
 ; ns.ocf is master server and hostmaster@ocf is technical contact
 @ IN SOA ns.ocf.berkeley.edu. hostmaster.ocf.berkeley.edu. (
-2016022400 ; serial number
+2016022502 ; serial number
                          1d         ; slave refresh schedule interval
                          30m        ; slave retry on failure interval
                          4w         ; slave expiration of zone data
@@ -102,17 +102,33 @@ localhost	IN A	127.0.0.1
 ; networking infrastructure
 blackhole	IN A	169.229.226.2
 
+; blackhole (switch)
+blackhole	IN A	169.229.226.2
+blackhole	IN AAAA	2607:f140:8801::1:2
+
 ; hal (server), roles: [ocf_backups, ocf_kvm]
 hal	IN A	169.229.226.10
 hal	IN AAAA	2607:f140:8801::1:10
+
+; hal-mgmt (ipmi)
+hal-mgmt	IN A	169.229.226.11
+hal-mgmt	IN AAAA	2607:f140:8801::1:11
 
 ; jaws (server), roles: [ocf::packages::docker, ocf_filehost, ocf_kvm]
 jaws	IN A	169.229.226.12
 jaws	IN AAAA	2607:f140:8801::1:12
 
+; jaws-mgmt (ipmi)
+jaws-mgmt	IN A	169.229.226.13
+jaws-mgmt	IN AAAA	2607:f140:8801::1:13
+
 ; pandemic (server), roles: [ocf_kvm]
 pandemic	IN A	169.229.226.14
 pandemic	IN AAAA	2607:f140:8801::1:14
+
+; pandemic-mgmt (ipmi)
+pandemic-mgmt	IN A	169.229.226.15
+pandemic-mgmt	IN AAAA	2607:f140:8801::1:15
 
 ; firestorm (server), roles: [ocf_kerberos, ocf_ldap]
 firestorm	IN A	169.229.226.20
@@ -162,6 +178,10 @@ fallingrocks	IN AAAA	2607:f140:8801::1:30
 flood	IN A	169.229.226.31
 flood	IN AAAA	2607:f140:8801::1:31
 
+; radiation (wifi)
+radiation	IN A	169.229.226.32
+radiation	IN AAAA	2607:f140:8801::1:32
+
 ; dementors (server), roles: [ocf_stats]
 dementors	IN A	169.229.226.33
 dementors	IN AAAA	2607:f140:8801::1:33
@@ -190,7 +210,7 @@ dev-anthrax	IN AAAA	2607:f140:8801::1:39
 dev-sandstorm	IN A	169.229.226.40
 dev-sandstorm	IN AAAA	2607:f140:8801::1:40
 
-; dev-tsunami (server)
+; dev-tsunami (server), roles: [ocf_ssh]
 dev-tsunami	IN A	169.229.226.41
 dev-tsunami	IN AAAA	2607:f140:8801::1:41
 
@@ -381,6 +401,14 @@ hozer-89	IN AAAA	2607:f140:8801::1:89
 ; tornado (server), roles: [ocf_desktop::drivers, ocf_desktop::steam, ocf_tv]
 tornado	IN A	169.229.226.90
 tornado	IN AAAA	2607:f140:8801::1:90
+
+; deforestation (printer)
+deforestation	IN A	169.229.226.91
+deforestation	IN AAAA	2607:f140:8801::1:91
+
+; logjam (printer)
+logjam	IN A	169.229.226.92
+logjam	IN AAAA	2607:f140:8801::1:92
 
 ; eruption (desktop)
 eruption	IN A	169.229.226.100

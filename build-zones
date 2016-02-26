@@ -8,8 +8,8 @@ Right now, it only generates A/AAAA and reverse-DNS records for hosts, and the
 result needs to be checked in to git.
 """
 import re
+import time
 from collections import namedtuple
-from dns import reversename
 from ipaddress import ip_address
 from itertools import chain
 from operator import attrgetter
@@ -67,8 +67,7 @@ class Host(namedtuple('Host', ('hostname',))):
 
     @cached_property
     def ipv4(self):
-        attrs = self.ldap_attrs
-        ipv4, = attrs['ipHostNumber']
+        ipv4, = self.ldap_attrs['ipHostNumber']
         ipv4 = ip_address(ipv4)
         assert is_ocf_ip(ipv4), ipv4
         return ipv4
@@ -76,7 +75,7 @@ class Host(namedtuple('Host', ('hostname',))):
     @cached_property
     def ipv6(self):
         ipv6 = ipv4_to_ipv6(self.ipv4)
-        assert is_ocf_ip(ipv6), ipv6
+        assert is_ocf_ip(ipv6), ipv6  # just in case
         return ipv6
 
     @cached_property
@@ -93,7 +92,7 @@ class Host(namedtuple('Host', ('hostname',))):
     @cached_property
     def last_quad(self):
         """Return the last quad from this host's IP address."""
-        return int(self.ipv4.exploded.split('.')[-1])
+        return self.ipv4.packed[3]
 
 
     def forward_dns_records(self):
@@ -166,16 +165,34 @@ def reverse_file_v6(hosts, serial):
     )
 
 
-def generate_serial():
-    # TODO: this
-    return '2016022400'
+def next_serial():
+    """Return the next-greatest serial number from what's currently in use.
+
+    We don't want to assume networking is working, or that the DNS server is
+    up, or that the most recent changes have already propagated (e.g. they
+    might be half-way through a Jenkins pipeline).
+
+    So, instead we read it from a file we check into git.
+    """
+    date_as_str = time.strftime('%Y%m%d')
+    try:
+        serial = open('etc/serial').read().strip()
+        if serial.startswith(date_as_str) and len(serial) == 10:
+            return str(int(serial) + 1)
+    except IOError:
+        pass
+    return date_as_str + '00'
+
 
 
 def main(argv=None):
     hosts = hosts_from_ldap()
 
     # generate zone files
-    serial = generate_serial()
+    serial = next_serial()
+
+    with open('etc/serial', 'w') as f:
+        f.write('{}\n'.format(serial))
 
     ocf_zone = forward_file(hosts, serial)
     with open('etc/zones/db.ocf', 'w') as f:
