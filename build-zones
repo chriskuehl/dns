@@ -17,6 +17,7 @@ from operator import attrgetter
 import ldap3
 from cached_property import cached_property
 from ocflib.constants import OCF_LDAP_HOSTS
+from ocflib.infra.hosts import HOST_TYPES_WITH_IPV6
 from ocflib.infra.net import ipv4_to_ipv6
 from ocflib.infra.net import is_ocf_ip
 from ocflib.infra.ldap import ldap_ocf
@@ -74,9 +75,11 @@ class Host(namedtuple('Host', ('hostname',))):
 
     @cached_property
     def ipv6(self):
-        ipv6 = ipv4_to_ipv6(self.ipv4)
-        assert is_ocf_ip(ipv6), ipv6  # just in case
-        return ipv6
+        host_type, = self.ldap_attrs['type']
+        if host_type in HOST_TYPES_WITH_IPV6:
+            ipv6 = ipv4_to_ipv6(self.ipv4)
+            assert is_ocf_ip(ipv6), ipv6  # just in case
+            return ipv6
 
     @cached_property
     def ldap_attrs(self):
@@ -160,7 +163,7 @@ def reverse_file_v6(hosts, serial):
         serial=serial,
         records='\n'.join(chain.from_iterable(
             host.reverse_dns_records_v6()
-            for host in sorted(hosts, key=attrgetter('ipv6'))
+            for host in sorted(filter(lambda host: host.ipv6, hosts), key=attrgetter('ipv6'))
         ))
     )
 
